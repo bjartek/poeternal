@@ -42,7 +42,7 @@ access(all) contract Poeternal : SimpleNFT{
 
         }
 
-        /// Uses the basic NFT views
+        /// Uses the poeternal NFT views
         access(all) view fun getViews(): [Type] {
             return [
             Type<MetadataViews.Display>(),
@@ -130,7 +130,7 @@ access(all) contract Poeternal : SimpleNFT{
         let minter <- create Minter()
         self.nftType= Type<@Poeternal.NFT>() //we cannot have generics so we make a poor mans generics
 
-        self.minterPath=/storage/basicNFTMinter
+        self.minterPath=/storage/poeternalNFTMinter
         self.account.storage.save(<-minter, to: self.minterPath)
     }
 

@@ -10,7 +10,7 @@ transaction(receiver:Address) {
     let collection : &{NonFungibleToken.Receiver}
 
     prepare(signer: auth(BorrowValue) &Account) {
-        self.minter =signer.storage.borrow<&Poeternal.Minter>(from: /storage/basicNFTMinter)!
+        self.minter =signer.storage.borrow<&Poeternal.Minter>(from: /storage/poeternalNFTMinter)!
         let cd = Poeternal.getCollectionData()
         self.collection = getAccount(receiver).capabilities.borrow<&{NonFungibleToken.Receiver}>(cd.publicPath) ?? panic("Could not get receiver reference to the NFT Collection")
     }
