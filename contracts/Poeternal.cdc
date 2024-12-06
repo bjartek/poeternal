@@ -2,8 +2,9 @@ import "NonFungibleToken"
 import "MetadataViews"
 import "ViewResolver"
 import "SimpleNFT"
+import "Base64Util"
 
-access(all) contract Poeternal : SimpleNFT{
+access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
 
 
 
@@ -12,14 +13,33 @@ access(all) contract Poeternal : SimpleNFT{
         access(all) let lines: [String]
         access(all) let colour: String
         access(all) let author: String
+        access(all) let source: String
 
 
-        init(name: String, lines: [String], author: String, colour:String) {
+        init(name: String, lines: [String], author: String, colour:String, source:String) {
             self.name=name 
             self.lines=lines 
             self.author=author
             self.colour=colour
+            self.source=source
         }
+
+
+        access(all) fun generateSVG() : String {
+            let color = self.colour
+            let lines=self.lines
+            let author=self.author
+            let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 600 380\" width=\"600\" height=\"380\">"
+            .concat("<rect width=\"100%\" height=\"100%\" fill=\"").concat(color).concat("\" />") // Background color
+            .concat("<text x=\"50%\" y=\"20%\" font-family=\"Cursive, Georgia, serif\" font-size=\"36\" text-anchor=\"middle\" fill=\"#3D2B1F\" font-style=\"italic\">").concat(lines[0]).concat("</text>")
+            .concat("<text x=\"50%\" y=\"35%\" font-family=\"Cursive, Georgia, serif\" font-size=\"36\" text-anchor=\"middle\" fill=\"#3D2B1F\" font-style=\"italic\">").concat(lines[1]).concat("</text>")
+            .concat("<text x=\"50%\" y=\"50%\" font-family=\"Cursive, Georgia, serif\" font-size=\"36\" text-anchor=\"middle\" fill=\"#3D2B1F\" font-style=\"italic\">").concat(lines[2]).concat("</text>")
+            .concat("<text x=\"50%\" y=\"65%\" font-family=\"Cursive, Georgia, serif\" font-size=\"36\" text-anchor=\"middle\" fill=\"#3D2B1F\" font-style=\"italic\">").concat(lines[3]).concat("</text>")
+            .concat("<text x=\"50%\" y=\"85%\" font-family=\"'Brush Script MT', cursive\" font-size=\"36\" font-style=\"italic\" text-anchor=\"middle\" fill=\"#3D2B1F\" alignment-baseline=\"middle\">").concat(author).concat("</text>")
+            .concat("</svg>")
+            return svg
+        }
+
     }
 
     access(all) let minterPath : StoragePath
@@ -32,6 +52,7 @@ access(all) contract Poeternal : SimpleNFT{
         /// Arbitrary trait mapping metadata
         access(self) let metadata: PoeternalMint
 
+        access(self) let image: String //we prerender this
         access(all) let id:UInt64
 
         init(
@@ -39,6 +60,7 @@ access(all) contract Poeternal : SimpleNFT{
         ) {
             self.metadata=metadata
             self.id=self.uuid
+            self.image=self.renderImage()
 
         }
 
@@ -55,18 +77,26 @@ access(all) contract Poeternal : SimpleNFT{
         access(all) fun resolveDisplay() : MetadataViews.Display {
             return MetadataViews.Display(
                 name: self.metadata.name,
-                description: "TODO",
+                description: String.join(self.metadata.lines, separator:"\n"),
                 thumbnail: MetadataViews.HTTPFile(
-                    url: "self.thumbnail"
+                    url: self.image
                 )
             )
+        }
+
+
+        access(all) fun renderImage() : String {
+            let svg = self.metadata.generateSVG()
+            let svgEncoded = Base64Util.encode(svg)
+            return "data:image/svg+xml;base64,".concat(svgEncoded)
         }
 
         access(all) fun resolveTraits() : MetadataViews.Traits {
 
             let traits: [MetadataViews.Trait] = [
             //TODO: add more traits
-            MetadataViews.Trait(name: "author", value: "@".concat(self.metadata.author), displayType: "string", rarity: nil)
+            MetadataViews.Trait(name: "author", value: "@".concat(self.metadata.author), displayType: "string", rarity: nil),
+            MetadataViews.Trait(name: "source", value: self.metadata.source, displayType: "string", rarity: nil)
 
             ]
             return MetadataViews.Traits(traits)

@@ -4,7 +4,7 @@ import "Poeternal"
 import "UniversalCollection"
 import "MetadataViews"
 
-transaction(receiver:Address) {
+transaction(receiver:Address, metadata: Poeternal.PoeternalMint) {
 
     let minter :&Poeternal.Minter
     let collection : &{NonFungibleToken.Receiver}
@@ -16,6 +16,6 @@ transaction(receiver:Address) {
     }
 
     execute {
-        self.minter.mintNFT(metadata: {"Foo": "Bar"}, receiver:self.collection)
+        self.minter.mintNFT(metadata: metadata, receiver:self.collection)
     }
 }

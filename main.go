@@ -1,41 +1,42 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/bjartek/overflow/v2"
-	"github.com/fatih/color"
 )
 
 func main() {
-	fmt.Print("\033[H\033[2J")
-	o := overflow.Overflow(overflow.WithPrintResults(), overflow.WithFlowForNewUsers(10.0))
+	o := overflow.Overflow(overflow.WithPrintResults(), overflow.WithNetwork("testnet"))
 
 	if o.Error != nil {
 		panic(o.Error)
 	}
 
-	o.Tx("setup", overflow.WithSigner("alice"))
-	o.Tx("setup", overflow.WithSigner("bob"))
-	message("We have started the emulator, deployed our Poeternal and created two tests users alice and bob")
-	pause()
+	//	o.Tx("setup", overflow.WithSigner("poeternal"))
 
-	message("We mint an NFT")
+	mint := Poeternal_PoeternalMint{
+		Name: "YourView",
+		Lines: []string{
+			"To speak of dreams that they hold dear, ",
+			"Will bring their joys and passions near.  ",
+			"For when their world is seen through you, ",
+			"A bond is formed, enduring, true.",
+		},
+		Colour: "#F8D6D6",
+		Author: "0xBjarteK",
+		Source: "How to win friends and influence people",
+	}
 	// We mint the NFT as this admin
 	o.Tx("mintNFT",
-		overflow.WithSignerServiceAccount(),
-		overflow.WithArg("receiver", "bob"),
-	)
+		overflow.WithSigner("poeternal"),
+		overflow.WithArg("receiver", "poeternal"),
+		overflow.WithArg("metadata", mint),
+	).Print()
 }
 
-func pause() {
-	fmt.Println()
-	color.Yellow("press any key to continue")
-	fmt.Scanln()
-	fmt.Print("\033[H\033[2J")
-}
-
-func message(msg string) {
-	fmt.Println()
-	color.Green(msg)
+type Poeternal_PoeternalMint struct {
+	Name   string   `json:"name"`
+	Colour string   `json:"colour"`
+	Author string   `json:"author"`
+	Source string   `json:"source"`
+	Lines  []string `json:"lines"`
 }
