@@ -126,7 +126,7 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
         let media = MetadataViews.Media(
             file: MetadataViews.HTTPFile(
                 //TODO fix
-                url: "https://assets.website-files.com/5f6294c0c7a8cdd643b1c820/5f6294c0c7a8cda55cb1c936_Flow_Wordmark.svg"
+                url: "https://github.com/bjartek/poeternal/blob/main/poeternal.jpeg?raw=true"
             ),
             mediaType: "image/svg+xml"
         )
@@ -137,7 +137,6 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
             squareImage: media,
             bannerImage: media,
             socials: {
-                //TODO: add twitter
                 "twitter": MetadataViews.ExternalURL("https://twitter.com/poeternal")
             }
         )
