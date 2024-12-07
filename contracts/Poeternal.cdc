@@ -6,24 +6,22 @@ import "Base64Util"
 
 access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
 
-
+    access(all) entitlement Admin
 
     access(all) struct PoeternalMint {
         access(all) let name: String
-        access(all) let lines: [String]
+        access(all) let lines: [String;4]
         access(all) let colour: String
         access(all) let author: String
         access(all) let source: String
 
-
-        init(name: String, lines: [String], author: String, colour:String, source:String) {
+        init(name: String, lines: [String;4], author: String, colour:String, source:String) {
             self.name=name 
             self.lines=lines 
             self.author=author
             self.colour=colour
             self.source=source
         }
-
 
         access(all) fun generateSVG() : String {
             let color = self.colour
@@ -56,12 +54,17 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
         access(all) let id:UInt64
 
         init(
+            id: UInt64,
             metadata: PoeternalMint
         ) {
             self.metadata=metadata
-            self.id=self.uuid
+            self.id=id
             self.image=self.renderImage()
 
+        }
+
+        access(all) view fun getMetadata() : PoeternalMint {
+            return self.metadata
         }
 
         /// Uses the poeternal NFT views
@@ -77,7 +80,7 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
         access(all) fun resolveDisplay() : MetadataViews.Display {
             return MetadataViews.Display(
                 name: self.metadata.name,
-                description: String.join(self.metadata.lines, separator:"\n"),
+                description: String.join(self.metadata.lines.toVariableSized(), separator:"\n"),
                 thumbnail: MetadataViews.HTTPFile(
                     url: self.image
                 )
@@ -94,7 +97,6 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
         access(all) fun resolveTraits() : MetadataViews.Traits {
 
             let traits: [MetadataViews.Trait] = [
-            //TODO: add more traits
             MetadataViews.Trait(name: "author", value: "@".concat(self.metadata.author), displayType: "string", rarity: nil),
             MetadataViews.Trait(name: "source", value: self.metadata.source, displayType: "string", rarity: nil)
 
@@ -104,7 +106,7 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
 
         }
 
-        //TODO: add more views
+        //add rarity here maybe? we can add that later
         access(all) fun resolveView(_ view: Type): AnyStruct? {
             switch view {
                 case Type<MetadataViews.Display>(): return self.resolveDisplay()
@@ -125,7 +127,6 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
 
         let media = MetadataViews.Media(
             file: MetadataViews.HTTPFile(
-                //TODO fix
                 url: "https://github.com/bjartek/poeternal/blob/main/poeternal.jpeg?raw=true"
             ),
             mediaType: "image/svg+xml"
@@ -143,12 +144,17 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
     }
 
     access(all) resource Minter {
-        access(all) fun mintNFT(metadata: PoeternalMint, receiver : &{NonFungibleToken.Receiver}){
-            let nft <- create NFT(metadata: metadata)
-            emit Minted(id: nft.id, uuid:nft.uuid, to: receiver.owner?.address, type: Type<@Poeternal.NFT>().identifier)
-            receiver.deposit(token: <- nft)
+        access(Admin) fun mintNFT(id: UInt64, metadata: PoeternalMint, receiver : &{NonFungibleToken.Receiver}){
+            Poeternal.mintNFT(id: id, metadata: metadata, receiver: receiver)
         }
     }
+
+    access(account) fun mintNFT(id:UInt64, metadata: PoeternalMint, receiver : &{NonFungibleToken.Receiver}){
+        let nft <- create NFT(id:id, metadata: metadata)
+        emit Minted(id: id, uuid:nft.uuid, to: receiver.owner?.address, type: Type<@Poeternal.NFT>().identifier)
+        receiver.deposit(token: <- nft)
+    }
+
 
     //I really do not want this method here, but i need to because of an bug in inheritance of interface 
     access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
@@ -162,8 +168,4 @@ access(all) contract Poeternal : SimpleNFT, NonFungibleToken {
         self.minterPath=/storage/poeternalNFTMinter
         self.account.storage.save(<-minter, to: self.minterPath)
     }
-
-
 }
-
-

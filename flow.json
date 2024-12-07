@@ -1,7 +1,8 @@
 {
   "contracts": {
-    "Poeternal": "./contracts/Poeternal.cdc",
+    "Teleporter": "./contracts/Teleporter.cdc",
     "EVMHelper": "./contracts/EVMHelper.cdc",
+    "Poeternal": "./contracts/Poeternal.cdc",
     "SimpleNFT": "./contracts/SimpleNFT.cdc",
     "UniversalCollection": "./contracts/UniversalCollection.cdc"
   },
@@ -107,8 +108,8 @@
       "key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
     },
     "testnet-poeternal": {
-      "address": "2a5c4164b0138c0a",
-      "key": "558e78c5a2d113a22e1f9e943a606862d973f5cb4d9fd3198395b70ff6d441e6"
+      "address": "33957ed3c50e9d52",
+      "key": "${POETERNAL_PK}"
     }
   },
   "deployments": {
@@ -118,7 +119,8 @@
         "SimpleNFT",
         "Poeternal",
         "EVMHelper",
-        "Base64Util"
+        "Base64Util",
+        "Teleporter"
       ],
       "emulator-alice": [],
       "emulator-bob": []
@@ -128,7 +130,8 @@
         "UniversalCollection",
         "SimpleNFT",
         "Poeternal",
-        "EVMHelper"
+        "EVMHelper",
+        "Teleporter"
       ]
     }
   }
